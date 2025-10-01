@@ -1,0 +1,13 @@
+word,color,congruency,transition,lagging
+blue,red,in_congruent,,
+red,blue,in_congruent,switch,
+blue,blue,con,repeat,lag
+red,red,con,switch,lag
+red,blue,in_congruent,switch,nonlag
+red,red,con,switch,nonlag
+blue,blue,con,switch,nonlag
+red,blue,in_congruent,repeat,lag
+red,blue,in_congruent,repeat,nonlag
+red,blue,in_congruent,repeat,nonlag
+blue,blue,con,repeat,nonlag
+red,blue,in_congruent,repeat,nonlag
