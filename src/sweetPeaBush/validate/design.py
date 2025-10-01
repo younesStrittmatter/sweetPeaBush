@@ -1,5 +1,5 @@
 import sweetpea as sp
-from sweetTea.utils import get_lag, ValidationErrorCollection, ValidationError
+from sweetPeaBush.utils import get_lag, ValidationErrorCollection, ValidationError
 
 
 def validation_errors_design(block, df, kind="regular_only"):

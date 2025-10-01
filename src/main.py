@@ -1,7 +1,7 @@
 import sweetpea as sp
 import pandas as pd
-# from src.sweetTea.design.validate import validation_errors_design
-from sweetTea.validate.crossing import validation_errors_crossings
+# from src.sweetPeaBush.design.validate import validation_errors_design
+from sweetPeaBush.validate.crossing import validation_errors_crossings
 
 word = sp.Factor("word", [sp.Level("red",2), "blue"])
 color = sp.Factor("color", ["red", sp.Level("blue",3)])

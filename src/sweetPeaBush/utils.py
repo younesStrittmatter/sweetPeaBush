@@ -8,7 +8,7 @@ def get_lag(factor):
 
     Examples:
         >>> import sweetpea as sp
-        >>> from src.sweetTea.utils import get_lag
+        >>> from src.sweetPeaBush.utils import get_lag
         >>> color = sp.Factor("color", ["red", "blue"])
         >>> get_lag(color)
         1
