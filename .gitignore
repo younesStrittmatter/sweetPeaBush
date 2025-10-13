@@ -5,4 +5,4 @@
 .env
 playground
 /playground/
-*.egg-info
+**/*.egg-info
