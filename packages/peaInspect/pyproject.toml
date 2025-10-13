@@ -1,0 +1,29 @@
+[project]
+# UPDATE THIS BEFORE PUBLISHING
+name = "sweetPeaBush"
+description = "A declarative language in python for investigating and evolving"
+authors = [{ name = "Younes Strittmatter", email = "ystrittm@gmail.com" }]
+version = "0.0.0"
+
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9,<4"
+
+# ADD NEW DEPENDENCIES HERE
+dependencies = [
+    "sweetpea==0.2.10",
+    "statsmodels==0.14.0",
+]
+
+
+[project.urls]
+homepage = "https://github.com/younesStrittmatter/sweetPeaBush"
+repository = "https://https://github.com/younesStrittmatter/sweetPeaBush"
+documentation = "https://autoresearch.github.io/sweetbean/"
+
+
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]

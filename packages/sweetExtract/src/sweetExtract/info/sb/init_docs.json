@@ -1,0 +1,116 @@
+{
+  "htmlchoice": {
+    "class_name": "HtmlChoice",
+    "signature": "__init__(self, duration=None, html_array=None, values=None, time_after_response=3000, side_effects=None)",
+    "init_docstring": "Arguments:\n    duration (int): The duration of the stimulus\n    html_array (list): An array of html elements that can be clicked\n    values (list): An array of values corresponding to the html elements\n    time_after_response (int): The time after a response is made\n        (for example, for animations)\n    side_effects (dict): A dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Choice.py"
+  },
+  "bandit": {
+    "class_name": "Bandit",
+    "signature": "__init__(self, duration=None, bandits=None, time_after_response=2000, side_effects=None)",
+    "init_docstring": "Arguments:\n    duration (int): The duration of the stimulus\n    bandits (list): A list of bandits\n        (in the form of dictionaries with entries for color and value)\n    time_after_response (int): The time after a response is made\n        (for example, for animations)\n    side_effects (dict): A dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Choice.py"
+  },
+  "foraging": {
+    "class_name": "Foraging",
+    "signature": "__init__(self, targets=None, distractors=None, position_mode='random', grid_cols=None, grid_rows=None, ring_radius_vmin=30, randomize_positions=True, arena_size_vmin=92, placement_inset_vmin=6, min_gap_vmin=2.5, background='#000000', color='#ffffff', token_box_size='12vmin', token_font_size='10vmin', overlay_pool=None, rotation_pool=None, trial_duration=None, end_when_found=True, response_ends_trial=False, seed=None, show_star_feedback=False, star_color='#f6b500', triggers=None, duration=None, side_effects=None)",
+    "init_docstring": null,
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Foraging.py"
+  },
+  "generic": {
+    "class_name": "Generic",
+    "signature": "__init__(self, side_effects=None, **kwargs)",
+    "init_docstring": null,
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Generic.py"
+  },
+  "htmlkeyboardresponse": {
+    "class_name": "HtmlKeyboardResponse",
+    "signature": "__init__(self, duration=None, stimulus='', choices=None, correct_key='', side_effects=None)",
+    "init_docstring": null,
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/HtmlKeyboardResponse.py"
+  },
+  "text": {
+    "class_name": "Text",
+    "signature": "__init__(self, duration=None, text='', color='white', choices=None, correct_key='', side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    text: the text should be presented\n    color: the color of the text\n    choices: the keys that will be recorded if pressed\n    correct_key: the correct key to press\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/HtmlKeyboardResponse.py"
+  },
+  "blank": {
+    "class_name": "Blank",
+    "signature": "__init__(self, duration=None, choices=None, correct_key='', side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    choices: the keys that will be recorded if pressed\n    correct_key: the correct key to press\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/HtmlKeyboardResponse.py"
+  },
+  "fixation": {
+    "class_name": "Fixation",
+    "signature": "__init__(self, duration=None, side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/HtmlKeyboardResponse.py"
+  },
+  "feedback": {
+    "class_name": "Feedback",
+    "signature": "__init__(self, duration=None, correct_message='Correct!', false_message='False!', correct_color='green', false_color='red', window=1, side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    correct_message: the message to show if the response was correct\n    false_message: the message to show if the response was false\n    correct_color: the color of the message if the response was correct\n    false_color: the color of the message if the response was false\n    window: how far back is the stimulus to check\n            (that stimulus needs to have a choice and a correct_key parameter)\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/HtmlKeyboardResponse.py"
+  },
+  "flanker": {
+    "class_name": "Flanker",
+    "signature": "__init__(self, duration=None, direction='left', distractor='left', choices=None, correct_key='', color='white', n_flankers=2, side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    direction: the direction of the target (allowed: left, right, l, r, L, R)\n    distractor: the direction of the distractor (allowed: left, right, l, r, L, R)\n    choices: the keys that will be recorded if pressed\n    correct_key: the correct key to press\n    color: the color of the text\n    n_flankers: the number of distractors\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/HtmlKeyboardResponse.py"
+  },
+  "symbol": {
+    "class_name": "Symbol",
+    "signature": "__init__(self, duration=None, symbol='', color='white', choices=None, correct_key='', side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    symbol: the symbol to show (allowed: square, triangle, circle)\n    color: the color of the symbol\n    choices: the keys that will be recorded if pressed\n    correct_key: the correct key to press\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/HtmlKeyboardResponse.py"
+  },
+  "image": {
+    "class_name": "Image",
+    "signature": "__init__(self, duration=None, stimulus='', choices=None, correct_key='', side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    stimulus: the path to the image\n    choices: the keys that will be recorded if pressed\n    correct_key: the correct key to press\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Image.py"
+  },
+  "randomobjectkinematogram": {
+    "class_name": "RandomObjectKinematogram",
+    "signature": "__init__(self, duration=None, number_of_oobs=300, number_of_apertures=1, coherent_movement_direction=180, coherent_orientation=180, coherence_movement=100, coherence_orientation=100, movement_speed=10, aperture_position_left=50, aperture_position_top=50, oob_color='white', background_color='black', stimulus_type=0, choices=None, correct_key='', side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented // trial_duration\n    number_of_oobs: the number of oriented objects per set in the stimulus\n    number_of_apertures: the number of kinematograms\n    coherent_movement_direction: the direction of coherent motion in degrees\n        (0 degre meaning right)\n    coherent_orientation: the orientation of the objects in degree\n        (0 degree meaning right)\n    coherence_movement: the percentage of oriented objects moving in the coherent direction.\n    coherence_orientation: the percentage of oriented objects moving in the coherent\n        direction.\n    movement_speed: the movement speed of the oobs in (percentage of aperture_width)/second\n    aperture_position_left: position of midpoint of aperture in x direction in percentage\n        of window width\n    aperture_position_top: position of midpoint of aperture in y direction in percentage\n        of window height\n    oob_color: the color of the orientated objects\n    background_color: the background color\n    choices: the valid keys that the subject can press to indicate a response\n    correct_key: the correct key to press\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/RO.py"
+  },
+  "randomdotpatterns": {
+    "class_name": "RandomDotPatterns",
+    "signature": "__init__(self, duration=None, number_of_oobs=300, number_of_apertures=2, coherent_orientation=0, coherence_orientation=0, aperture_position_left=50, aperture_position_top=50, oob_color='white', background_color='grey', stimulus_type=1, choices=None, correct_key='', side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented // trial_duration\n    number_of_oobs: the number of oriented objects per set in the stimulus\n    number_of_apertures: the number of kinematograms\n    coherent_orientation: the orientation of the objects in degree\n        (0 degree meaning right)\n    coherence_orientation: the percentage of oriented objects moving in the coherent\n        direction.\n    aperture_position_left: position of midpoint of aperture in x direction in percentage\n        of window width\n    aperture_position_top: position of midpoint of aperture in y direction in percentage\n        of window height\n    oob_color: the color of the orientated objects\n    background_color: the background color\n    choices: the valid keys that the subject can press to indicate a response\n    correct_key: the correct key to press\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/RO.py"
+  },
+  "rsvp": {
+    "class_name": "RSVP",
+    "signature": "__init__(self, background='#000000', color='#ffffff', direction='row', stream_order=None, gap='6rem', token_box_size='18vmin', token_font_size='10vmin', token_padding='0.25em 0.45em', streams=None, stimulus_duration=100, isi=0, mask_html=None, choices='ALL', end_on_response=False, response_window=None, correct_keys=None, decorate_targets=True, target_shape='none', target_stroke='3px', targets=None, trial_duration=None, record_timestamps=True, duration=None, side_effects=None)",
+    "init_docstring": null,
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/RSVP.py"
+  },
+  "textsurvey": {
+    "class_name": "TextSurvey",
+    "signature": "__init__(self, questions=None, side_effects=None)",
+    "init_docstring": "Arguments:\n    questions: a list of strings representing the questions\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Survey.py"
+  },
+  "multichoicesurvey": {
+    "class_name": "MultiChoiceSurvey",
+    "signature": "__init__(self, questions=None, side_effects=None)",
+    "init_docstring": "Arguments:\n    questions: a list of dictionaries with the keys \"prompt\" and \"options\"\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Survey.py"
+  },
+  "likertsurvey": {
+    "class_name": "LikertSurvey",
+    "signature": "__init__(self, questions=None, side_effects=None)",
+    "init_docstring": "Arguments:\n    questions: a list of dictionaries with the keys \"prompt\" and \"labels\"\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Survey.py"
+  },
+  "video": {
+    "class_name": "Video",
+    "signature": "__init__(self, duration=0, src='', choices=None, correct_key='', side_effects=None)",
+    "init_docstring": "Arguments:\n    duration: time in ms the stimulus is presented\n    src: the path to the image\n    choices: the keys that will be recorded if pressed\n    correct_key: the correct key to press\n    side_effects: a dictionary of side effects",
+    "source_relpath": "/var/folders/1b/73431t791q1_7tb99v1jc9ww0000gp/T/sweetbean_minimal_6z1ox77o/src/sweetbean/stimulus/Video.py"
+  }
+}

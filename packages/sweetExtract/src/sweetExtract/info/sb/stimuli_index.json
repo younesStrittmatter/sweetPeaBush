@@ -1,0 +1,116 @@
+[
+  {
+    "key": "htmlchoice",
+    "title": "Choice",
+    "description": "A set of choices (can be html code or bandits) with values. The participant is asked to choose an option by clicking on it.",
+    "docs_index_relpath": "docs/Stimuli/choice/index.md"
+  },
+  {
+    "key": "bandit",
+    "title": "Choice",
+    "description": "A set of choices (can be html code or bandits) with values. The participant is asked to choose an option by clicking on it.",
+    "docs_index_relpath": "docs/Stimuli/choice/index.md"
+  },
+  {
+    "key": "foraging",
+    "title": "Foraging",
+    "description": "A stimulus where multiple items are displayed on screen some of which are targets that are collected by clicking on\nthem. The other items are distractors that should be ignored. The task ends when all targets are collected or when a\ntime limit is reached.",
+    "docs_index_relpath": "docs/Stimuli/foraging/index.md"
+  },
+  {
+    "key": "generic",
+    "title": "Generic",
+    "description": "",
+    "docs_index_relpath": null
+  },
+  {
+    "key": "htmlkeyboardresponse",
+    "title": "HtmlKeyboardResponse",
+    "description": "",
+    "docs_index_relpath": null
+  },
+  {
+    "key": "text",
+    "title": "Text Stimuli",
+    "description": "Display colored text (including special characters).",
+    "docs_index_relpath": "docs/Stimuli/text/index.md"
+  },
+  {
+    "key": "blank",
+    "title": "Blank",
+    "description": "",
+    "docs_index_relpath": null
+  },
+  {
+    "key": "fixation",
+    "title": "Fixation",
+    "description": "",
+    "docs_index_relpath": null
+  },
+  {
+    "key": "feedback",
+    "title": "Feedback",
+    "description": "",
+    "docs_index_relpath": null
+  },
+  {
+    "key": "flanker",
+    "title": "Flanker",
+    "description": "",
+    "docs_index_relpath": null
+  },
+  {
+    "key": "symbol",
+    "title": "Symbol",
+    "description": "",
+    "docs_index_relpath": null
+  },
+  {
+    "key": "image",
+    "title": "Image",
+    "description": "Displays an image.",
+    "docs_index_relpath": "docs/Stimuli/image/index.md"
+  },
+  {
+    "key": "randomobjectkinematogram",
+    "title": "Random Object Kinematogram",
+    "description": "Display moving and orientated objects (such as triangles).",
+    "docs_index_relpath": "docs/Stimuli/rok/index.md"
+  },
+  {
+    "key": "randomdotpatterns",
+    "title": "Random Dot Pattern",
+    "description": "Display static colored dots.",
+    "docs_index_relpath": "docs/Stimuli/rdp/index.md"
+  },
+  {
+    "key": "rsvp",
+    "title": "RSVP",
+    "description": "Display a series of stimuli in rapid succession with target stimuli embedded in the series.",
+    "docs_index_relpath": "docs/Stimuli/rsvp/index.md"
+  },
+  {
+    "key": "textsurvey",
+    "title": "Survey",
+    "description": "Display a survey to the user.",
+    "docs_index_relpath": "docs/Stimuli/survey/index.md"
+  },
+  {
+    "key": "multichoicesurvey",
+    "title": "Survey",
+    "description": "Display a survey to the user.",
+    "docs_index_relpath": "docs/Stimuli/survey/index.md"
+  },
+  {
+    "key": "likertsurvey",
+    "title": "Survey",
+    "description": "Display a survey to the user.",
+    "docs_index_relpath": "docs/Stimuli/survey/index.md"
+  },
+  {
+    "key": "video",
+    "title": "Video",
+    "description": "",
+    "docs_index_relpath": null
+  }
+]

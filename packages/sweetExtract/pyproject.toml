@@ -1,0 +1,39 @@
+[project]
+name = "sweetExtract"
+description = "A package to get experiments from papers and data"
+authors = [{ name = "Younes Strittmatter", email = "ystrittm@gmail.com" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9,<4"
+dynamic = ["version"]
+
+dependencies = [
+    "pymupdf==1.24.0",
+    "openai==2.2.0",
+    "python-dotenv==1.0.1",
+    "sweetpea==0.2.10",
+    "statsmodels==0.14.0",
+    "httpx==0.27.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/younesStrittmatter/sweetBush"
+Repository = "https://github.com/younesStrittmatter/sweetBush"
+Documentation = "https://younesStrittmatter.github.io/sweetBush/"
+
+[build-system]
+requires = ["setuptools>=69", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Include your JSON resource files inside the wheel
+[tool.setuptools.package-data]
+sweetExtract = ["info/sb/*.json"]
+
+# Let setuptools_scm derive the version from your git tags
+[tool.setuptools_scm]
+# (optional) uncomment to control version formatting
+# version_scheme = "no-guess-dev"
+# local_scheme = "node-and-date"
