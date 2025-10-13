@@ -1,116 +1,206 @@
 [
   {
     "key": "htmlchoice",
-    "title": "Choice",
-    "description": "A set of choices (can be html code or bandits) with values. The participant is asked to choose an option by clicking on it.",
-    "docs_index_relpath": "docs/Stimuli/choice/index.md"
+    "title": "HtmlChoice",
+    "description": "Render multiple on-screen HTML elements as clickable options. A mouse or touch click selects one item; the stimulus\nrecords the selected index (`choice`) and, if provided, an associated `value`. An optional post-response delay lets\nshort animations or visual confirmation play before the trial ends.",
+    "when_to_use": [
+      "On-screen alternatives presented as buttons, icons, or custom HTML.",
+      "Mouse/touch tasks where the participant chooses one of several items.",
+      "Post-stimulus decision screens following another presentation phase."
+    ],
+    "docs_index_relpath": "docs/Stimuli/htmlChoice/index.md"
   },
   {
     "key": "bandit",
-    "title": "Choice",
-    "description": "A set of choices (can be html code or bandits) with values. The participant is asked to choose an option by clicking on it.",
-    "docs_index_relpath": "docs/Stimuli/choice/index.md"
+    "title": "Bandit",
+    "description": "Present a grid of colored squares representing multiple “bandits.” The participant clicks a square to choose one option.\nThe stimulus records the selected index (`choice`) and a corresponding `value` (e.g., payout/label). The layout adapts\nto the number of bandits, and a short post-response delay can drive simple animations before the trial ends.",
+    "when_to_use": [
+      "Multi-armed bandit tasks with several simultaneous options.",
+      "Reward/payout choice screens where each option has an associated value.",
+      "Visual grids of clickable alternatives."
+    ],
+    "docs_index_relpath": "docs/Stimuli/bandit/index.md"
   },
   {
     "key": "foraging",
     "title": "Foraging",
-    "description": "A stimulus where multiple items are displayed on screen some of which are targets that are collected by clicking on\nthem. The other items are distractors that should be ignored. The task ends when all targets are collected or when a\ntime limit is reached.",
+    "description": "Display an on-screen arena containing multiple items with a subset designated as **targets** and the rest as *\n*distractors**. Participants click targets to collect them. The trial typically ends when all targets are collected or\nwhen a time limit is reached. Layouts can be randomized or arranged (grid/circle), items avoid overlap, and tokens can\nbe HTML, text, simple shapes, or images.",
+    "when_to_use": [
+      "Multi-target visual search / foraging with click-to-collect responses.",
+      "You need control over target/distractor counts, spacing, placement mode, and timing.",
+      "You care about search efficiency metrics (e.g., targets per second), click streams, and completion rate."
+    ],
     "docs_index_relpath": "docs/Stimuli/foraging/index.md"
   },
   {
     "key": "generic",
     "title": "Generic",
     "description": "",
+    "when_to_use": [],
     "docs_index_relpath": null
   },
   {
     "key": "htmlkeyboardresponse",
     "title": "HtmlKeyboardResponse",
-    "description": "",
-    "docs_index_relpath": null
+    "description": "Display arbitrary HTML content and collect **keyboard** responses from a specified key set. Records the pressed key and reaction time (RT). An optional `correct_key` lets you mark correctness for downstream feedback.",
+    "when_to_use": [
+      "You want to show HTML (text, simple markup, etc.) and capture a keypress.",
+      "Response prompts that require a specific key set (e.g., [\"f\",\"j\"]).",
+      "As the response phase following another stimulus."
+    ],
+    "docs_index_relpath": "docs/Stimuli/htmlkeyboardresponse/index.md"
   },
   {
     "key": "text",
-    "title": "Text Stimuli",
-    "description": "Display colored text (including special characters).",
+    "title": "Text",
+    "description": "Show a text string in a chosen color. Optionally collect keyboard responses while the text is on screen.",
+    "when_to_use": [
+      "Present brief instructions, cues, or labels in text form.",
+      "Simple Stroop-style text displays (color/word).",
+      "A lightweight alternative to full HTML when you just need colored text."
+    ],
     "docs_index_relpath": "docs/Stimuli/text/index.md"
   },
   {
     "key": "blank",
     "title": "Blank",
-    "description": "",
-    "docs_index_relpath": null
+    "description": "Show a blank screen for a set duration. Can optionally record keyboard responses during the blank interval.",
+    "when_to_use": [
+      "Inter-trial intervals (ITI) and timing gaps.",
+      "Visual reset screens between stimuli.",
+      "Passive delays with optional response capture."
+    ],
+    "docs_index_relpath": "docs/Stimuli/blank/index.md"
   },
   {
     "key": "fixation",
     "title": "Fixation",
-    "description": "",
-    "docs_index_relpath": null
+    "description": "Show a centered fixation cross (“+”) for a specified duration. Typically used before a trial to stabilize gaze/attention.",
+    "when_to_use": [
+      "Pre-trial fixation to stabilize attention or gaze.",
+      "Brief timing anchor before stimulus onset.",
+      "Minimal visual content between task phases."
+    ],
+    "docs_index_relpath": "docs/Stimuli/fixation/index.md"
   },
   {
     "key": "feedback",
     "title": "Feedback",
-    "description": "",
-    "docs_index_relpath": null
+    "description": "Display a brief text message indicating whether the **previous** response was correct or incorrect, with configurable messages and colors.",
+    "when_to_use": [
+      "Trial-by-trial correctness feedback.",
+      "Simple score/progress indication using text and color.",
+      "Immediate reinforcement after a keypress response."
+    ],
+    "docs_index_relpath": "docs/Stimuli/feedback/index.md"
   },
   {
     "key": "flanker",
     "title": "Flanker",
-    "description": "",
-    "docs_index_relpath": null
+    "description": "Show a central target arrow flanked by distractor arrows (e.g., `<<><<`, `>><>>`). Participants respond to the target’s direction via keypress while flankers may be congruent or incongruent.",
+    "when_to_use": [
+      "Arrow-based Flanker tasks (congruent vs. incongruent).",
+      "Response interference paradigms with left/right keys.",
+      "Quick attentional control or conflict measurements."
+    ],
+    "docs_index_relpath": "docs/Stimuli/flanker/index.md"
   },
   {
     "key": "symbol",
     "title": "Symbol",
-    "description": "",
-    "docs_index_relpath": null
+    "description": "Show a simple geometric symbol (square, triangle, circle) in a specified color. Can optionally collect keyboard responses.",
+    "when_to_use": [
+      "Minimal, highly controlled visual tokens.",
+      "Cues or placeholders with low visual complexity."
+    ],
+    "docs_index_relpath": "docs/Stimuli/symbols/index.md"
   },
   {
     "key": "image",
     "title": "Image",
-    "description": "Displays an image.",
+    "description": "Display a static image file on screen. Optionally collect a keyboard response while the image is visible (e.g., specific keys like `[\"f\",\"j\"]`) and compute reaction time.",
+    "when_to_use": [
+      "Trials that present a pre-made picture/figure/photo as the main stimulus.",
+      "Your data has a column with image file paths or identifiers to show per trial.",
+      "You need a simple keypress response during or after image presentation."
+    ],
     "docs_index_relpath": "docs/Stimuli/image/index.md"
   },
   {
     "key": "randomobjectkinematogram",
     "title": "Random Object Kinematogram",
-    "description": "Display moving and orientated objects (such as triangles).",
-    "docs_index_relpath": "docs/Stimuli/rok/index.md"
+    "description": "Display oriented objects where a subset moves in a **coherent direction** and/or shares a **coherent orientation**, while the remaining objects move and orient randomly. You can control number of objects and apertures, coherence of motion and orientation, speed, positions, and colors to modulate task difficulty.",
+    "when_to_use": [
+      "Global motion / orientation coherence detection tasks.",
+      "Manipulating coherence level to adjust difficulty.",
+      "Single- or multi-aperture kinematogram displays."
+    ],
+    "docs_index_relpath": "docs/Stimuli/randomobjectkinematogram/index.md"
   },
   {
     "key": "randomdotpatterns",
-    "title": "Random Dot Pattern",
-    "description": "Display static colored dots.",
-    "docs_index_relpath": "docs/Stimuli/rdp/index.md"
+    "title": "Random Dot Patterns",
+    "description": "Present static arrays of oriented objects where a proportion share a **coherent orientation** and the remainder are random; no coherent **motion** is present. Supports multiple apertures to show two arrays simultaneously for comparison or discrimination tasks.",
+    "when_to_use": [
+      "Orientation coherence tasks without motion.",
+      "Two-array (dual aperture) comparisons.",
+      "Varying orientation coherence to control difficulty."
+    ],
+    "docs_index_relpath": "docs/Stimuli/randomdotpatterns/index.md"
   },
   {
     "key": "rsvp",
     "title": "RSVP",
-    "description": "Display a series of stimuli in rapid succession with target stimuli embedded in the series.",
+    "description": "Present one or more rapid serial visual presentation streams where items appear in quick succession. Participants detect or identify target items among distractors, optionally responding via keyboard. You can control stream layout (row/column), order, item timing (duration/ISI), masks, and trial duration.",
+    "when_to_use": [
+      "Attentional blink or target detection in fast streams.",
+      "Dual-stream (left/right) RSVP with synchronized or offset sequences.",
+      "Rapid sequences where precise item timing and ordering matter."
+    ],
     "docs_index_relpath": "docs/Stimuli/rsvp/index.md"
   },
   {
     "key": "textsurvey",
-    "title": "Survey",
-    "description": "Display a survey to the user.",
-    "docs_index_relpath": "docs/Stimuli/survey/index.md"
+    "title": "TextSurvey",
+    "description": "Present one or more free-text questions with text input fields. Participants type their answers; each response is recorded per question. Useful for short answers, open-ended prompts, and typed recall.",
+    "when_to_use": [
+      "Open-ended responses or brief written answers",
+      "Typed recall, explanations, or comments",
+      "Optional text capture after another stimulus"
+    ],
+    "docs_index_relpath": "docs/Stimuli/textsurvey/index.md"
   },
   {
     "key": "multichoicesurvey",
-    "title": "Survey",
-    "description": "Display a survey to the user.",
-    "docs_index_relpath": "docs/Stimuli/survey/index.md"
+    "title": "MultiChoiceSurvey",
+    "description": "Present one or more multiple-choice questions, each with a fixed set of options. Participants select one option per question; selections are recorded per question. Works well for categorical choices and simple questionnaires.",
+    "when_to_use": [
+      "Forced-choice or single-answer items",
+      "Simple questionnaires and demographics",
+      "Quick category selections per question"
+    ],
+    "docs_index_relpath": "docs/Stimuli/multichoicesurvey/index.md"
   },
   {
     "key": "likertsurvey",
-    "title": "Survey",
-    "description": "Display a survey to the user.",
-    "docs_index_relpath": "docs/Stimuli/survey/index.md"
+    "title": "LikertSurvey",
+    "description": "Present one or more Likert items with ordered labels (e.g., “Strongly disagree” → “Strongly agree”). Participants pick a position on the scale for each question; responses are recorded per item. Supports constructing surveys from a shared scale.",
+    "when_to_use": [
+      "Agreement/attitude ratings on an ordered scale",
+      "Standard psychometric or UX scales",
+      "Consistent rating anchors across many items"
+    ],
+    "docs_index_relpath": "docs/Stimuli/likertsurvey/index.md"
   },
   {
     "key": "video",
     "title": "Video",
-    "description": "",
-    "docs_index_relpath": null
+    "description": "Present a video clip and optionally collect a keyboard response while it plays or after it ends. Supports single or multiple source files, auto-play, end-on-finish behavior, and optional sizing/controls.",
+    "when_to_use": [
+      "Trials where a short video is the primary stimulus.",
+      "You want responses during/after playback with reaction time.",
+      "Stimuli referenced by file paths or URLs in your data."
+    ],
+    "docs_index_relpath": "docs/Stimuli/video/index.md"
   }
 ]

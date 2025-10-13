@@ -4,37 +4,35 @@ Builds a compact prompt bank for SweetBean stimuli in three slices, source-first
 
 Ground truth: scan `src/sweetbean/stimulus/*.py` for stimulus classes (and aliases like
 `ROK = RandomObjectKinematogram`). For each class, find its docs page under
-`docs/Stimuli/<dir>/index.md`, extract the **first non-empty line after the H1** as the
-short description, and collect example `*.py` files in that docs directory that actually
-reference the class or its alias(es).
+`docs/Stimuli/<dir>/index.md`, extract the description block (text after H1 until the next H2),
+and (optionally) the '## When To Use' section as a list of bullets. Collect example `*.py` files
+in that docs directory that actually reference the class or its alias(es).
 
-Outputs to ./prompt_bank/ :
-  1) step1_stimuli_index.json  – list of {key, title, description, docs_index_relpath}
-  2) step2_examples.json       – {key -> [ {filename, relpath, code} ]}
-  3) step3_init_docs.json      – {key -> {class_name, signature, init_docstring, source_relpath}}
-  4) manifest.json             – build metadata (GitHub repo/ref)
+Outputs to ./packages/sweetExtract/src/sweetExtract/info/sb/ :
+  - stimuli_index.json  – list of {key, title, description, when_to_use, docs_index_relpath}
+  - examples.json       – {key -> [ {filename, relpath, code} ]}
+  - init_docs.json      – {key -> {class_name, signature, init_docstring, source_relpath}}
+  - manifest.json       – build metadata (GitHub repo/ref)
 
 Repo/ref are hardcoded to AutoResearch/sweetbean @ main.
 """
 from __future__ import annotations
 
 import ast
-import base64
 import datetime as dt
+import io
 import json
-import os
 import re
 import shutil
+import tarfile
 import tempfile
-import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
-from tqdm import tqdm
-import io
-import tarfile
+
+BLACKLIST_DOC_DIRS = {"rok", "rdp"}
 
 # ----------------------------- Config & helpers ------------------------------
 
@@ -50,8 +48,8 @@ DOCS_TO_CLASSES_HINTS: Dict[str, List[str]] = {
     "rdp": ["RandomDotPatterns", "RDP", "ROK"],
 }
 
-MD_H1 = re.compile(r"^\s*#\s+(?P<title>.+?)\s*$", flags=re.MULTILINE)
-MD_FIRST_H2 = re.compile(r"^##\s+", flags=re.MULTILINE)
+MD_H1 = re.compile(r"^(?:\ufeff)?\s*#\s+(?P<title>.+?)\s*$", flags=re.MULTILINE)
+MD_H2 = re.compile(r"^\s*##\s+(?P<h2>.+?)\s*$", flags=re.MULTILINE)
 
 
 def _slug(s: str) -> str:
@@ -60,31 +58,69 @@ def _slug(s: str) -> str:
 
 # ----------------------------- Markdown parsing -----------------------------
 
-def parse_index_md(md_path: Path) -> Tuple[str, str]:
-    text = md_path.read_text(encoding="utf-8")
-    # Normalize newlines and strip BOM if present
-    text = text.replace("\r\n", "\n").replace("\r", "\n").lstrip("\ufeff")
+def _clean(s: str) -> str:
+    s = s.replace("\r\n", "\n").replace("\r", "\n")
+    s = re.sub(r"[ \t]+$", "", s, flags=re.MULTILINE)
+    s = re.sub(r"\n{3,}", "\n\n", s)
+    return s.strip()
 
-    # Extract H1 title
+
+def _extract_block(text: str, start_pos: int) -> str:
+    """Return text from start_pos up to (but not including) next H2, trimmed."""
+    m = MD_H2.search(text, pos=start_pos)
+    end = m.start() if m else len(text)
+    return _clean(text[start_pos:end])
+
+
+def _extract_h2_block(text: str, h2_name: str) -> str:
+    """Find '## h2_name' (case/space-insensitive) and return its block up to next H2."""
+    pattern = re.compile(rf"^\s*##\s+{re.escape(h2_name)}\s*$",
+                         re.IGNORECASE | re.MULTILINE)
+    m = pattern.search(text)
+    if not m:
+        return ""
+    return _extract_block(text, m.end())
+
+
+def _bullets(block: str) -> List[str]:
+    """Turn a markdown block into a list of bullets/lines; fallback to paragraphs."""
+    if not block.strip():
+        return []
+    items: List[str] = []
+    for line in block.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if re.match(r"^(\-|\*|\d+\.)\s+", line):
+            items.append(re.sub(r"^(\-|\*|\d+\.)\s+", "", line).strip())
+    if items:
+        return items
+    # no explicit list: split paragraphs
+    paras = [p.strip() for p in re.split(r"\n{2,}", block) if p.strip()]
+    return paras
+
+
+def parse_index_md(md_path: Path) -> Tuple[str, str, List[str]]:
+    """
+    Returns: (title, description, when_to_use_bullets[])
+    - description is the block after H1 up to the first H2 (trimmed)
+    - when_to_use is bullets under '## When To Use' (if present), else []
+    """
+    text = _clean(md_path.read_text(encoding="utf-8"))
+
+    # Title
     m = MD_H1.search(text)
     title = m.group("title").strip() if m else md_path.parent.name
 
-    # Slice after H1 line (or whole file if no H1)
-    after_h1 = text[m.end():] if m else text
+    # Description: from end of H1 to before first H2
+    after_h1_pos = m.end() if m else 0
+    description = _extract_block(text, after_h1_pos)
 
-    # Keep only content before the first '##' header (top-level description block)
-    h2 = MD_FIRST_H2.search(after_h1)
-    top_block = after_h1[:h2.start()] if h2 else after_h1
+    # When To Use: dedicated section (optional)
+    when_to_use_block = _extract_h2_block(text, "When To Use")
+    when_to_use = _bullets(when_to_use_block)
 
-    # Remove any leading blank or heading lines (defensive against stray '# ...')
-    lines = top_block.split("\n")
-    i = 0
-    while i < len(lines) and (not lines[i].strip() or lines[i].lstrip().startswith("#")):
-        i += 1
-    cleaned_block = "\n".join(lines[i:])
-
-    description = cleaned_block.strip()
-    return title, description
+    return title, description, when_to_use
 
 
 # ----------------------------- AST parsing ----------------------------------
@@ -108,9 +144,10 @@ class ClassInfo:
 
 def _ast_param_to_str(arg: ast.arg, default: Optional[ast.AST]) -> str:
     name = arg.arg
-    if default is None: return name
+    if default is None:
+        return name
     try:
-        val = ast.unparse(default)
+        val = ast.unparse(default)  # Python 3.9+
     except Exception:
         val = "..."
     return f"{name}={val}"
@@ -176,7 +213,7 @@ def extract_classes_from_module(module_path: Path) -> Tuple[List[ClassInfo], Dic
     for node in tree.body:
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             tgt = node.targets[0].id
-            if isinstance(node.value, ast.Name) and tgt.isupper():
+            if isinstance(node.value, ast.Name) and (tgt.isupper() or (tgt and tgt[0].isupper())):
                 aliases[tgt] = node.value.id
     # classes
     for node in tree.body:
@@ -203,6 +240,7 @@ class StimulusEntry:
     key: str
     title: str
     description: str
+    when_to_use: List[str]
     docs_index_relpath: Optional[str]
 
 
@@ -220,31 +258,36 @@ class StimulusRecord:
     init_info: InitInfo
 
 
-def _build_docs_catalog(repo_root: Path) -> Dict[str, Dict[str, str]]:
-    """Map multiple keys to the same docs record:
-       - 'dir' name
-       - slug(dir)
-       - slug(H1 title)
-       Value: {"title","desc","index_rel","dir"}.
-    """
-    out: Dict[str, Dict[str, str]] = {}
+def _build_docs_catalog(repo_root: Path) -> Dict[str, Dict[str, Any]]:
+    out: Dict[str, Dict[str, Any]] = {}
     base = repo_root / STIM_DOCS_ROOT
     if not base.exists():
         return out
     for d in sorted([p for p in base.iterdir() if p.is_dir()]):
+        # ⬇️ Skip alias-only directories entirely
+        if d.name.lower() in BLACKLIST_DOC_DIRS:
+            continue
+
         idx = d / "index.md"
         if not idx.exists():
             continue
-        title, desc = parse_index_md(idx)
-        rec = {"title": title, "desc": desc, "index_rel": str(idx.relative_to(repo_root)), "dir": d.name}
+        title, desc, when = parse_index_md(idx)
+        rec = {
+            "title": title,
+            "desc": desc,
+            "when": when,
+            "index_rel": str(idx.relative_to(repo_root)),
+            "dir": d.name
+        }
         out[d.name] = rec
         out[_slug(d.name)] = rec
         out[_slug(title)] = rec
     return out
 
 
-def _best_docs_match(class_name: str, aliases: List[str], module_basename: str, catalog: Dict[str, Dict[str, str]]) -> \
-Optional[Dict[str, str]]:
+
+def _best_docs_match(class_name: str, aliases: List[str], module_basename: str,
+                     catalog: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     cand_keys = [
         class_name, _slug(class_name),
         module_basename, _slug(module_basename),
@@ -253,11 +296,13 @@ Optional[Dict[str, str]]:
     for k in cand_keys:
         if k in catalog:
             return catalog[k]
+    # snake/kebab versions of class_name
     snake = re.sub(r"(?<!^)(?=[A-Z])", "_", class_name).lower()
     kebab = snake.replace("_", "-")
     for k in [snake, kebab, _slug(kebab)]:
         if k in catalog:
             return catalog[k]
+    # hints
     for dkey, clist in DOCS_TO_CLASSES_HINTS.items():
         if class_name in clist or any(a in clist for a in aliases):
             if dkey in catalog:
@@ -265,8 +310,8 @@ Optional[Dict[str, str]]:
     return None
 
 
-def _collect_examples_for_docs_dir(repo_root: Path, docs_dir_name: str, class_name: str, aliases: List[str]) -> List[
-    ExampleEntry]:
+def _collect_examples_for_docs_dir(repo_root: Path, docs_dir_name: str,
+                                   class_name: str, aliases: List[str]) -> List[ExampleEntry]:
     out: List[ExampleEntry] = []
     d = repo_root / STIM_DOCS_ROOT / docs_dir_name
     if not d.exists():
@@ -300,11 +345,19 @@ def build_prompt_bank(repo_root: Path) -> Dict[str, StimulusRecord]:
             key = _slug(ci.class_name)
             match = _best_docs_match(ci.class_name, ci.aliases, module_basename, docs_catalog)
             if match:
-                title, desc, idx_rel, docs_dir_name = match["title"], match["desc"], match["index_rel"], match["dir"]
+                title, desc, when, idx_rel, docs_dir_name = (
+                    match["title"], match["desc"], match["when"], match["index_rel"], match["dir"]
+                )
             else:
-                title, desc, idx_rel, docs_dir_name = ci.class_name, "", None, None
+                title, desc, when, idx_rel, docs_dir_name = ci.class_name, "", [], None, None
 
-            index_entry = StimulusEntry(key=key, title=title, description=desc, docs_index_relpath=idx_rel)
+            index_entry = StimulusEntry(
+                key=key,
+                title=title,
+                description=desc,
+                when_to_use=when,
+                docs_index_relpath=idx_rel
+            )
 
             examples: List[ExampleEntry] = []
             if docs_dir_name:
@@ -326,16 +379,22 @@ def build_prompt_bank(repo_root: Path) -> Dict[str, StimulusRecord]:
 
 def write_step_files(records: Dict[str, StimulusRecord], out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # stimuli_index.json
     step1 = [asdict(rec.index) for rec in records.values()]
     (out_dir / "stimuli_index.json").write_text(
         json.dumps(step1, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+
+    # examples.json
     step2: Dict[str, List[Dict[str, Any]]] = {}
     for key, rec in records.items():
         step2[key] = [asdict(ex) for ex in rec.examples]
     (out_dir / "examples.json").write_text(
         json.dumps(step2, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+
+    # init_docs.json
     step3: Dict[str, Dict[str, Any]] = {}
     for key, rec in records.items():
         step3[key] = asdict(rec.init_info)
@@ -349,7 +408,7 @@ def write_manifest_remote(out_dir: Path) -> None:
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "github": OWNER_REPO,
         "ref": GIT_REF,
-        "notes": "Built from GitHub raw files without cloning (minimal mirror).",
+        "notes": "Built from GitHub tarball without cloning (source-first scan).",
     }
     (out_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
@@ -358,46 +417,36 @@ def write_manifest_remote(out_dir: Path) -> None:
 
 # ----------------------------- Remote fetch helpers --------------------------
 
-
 def _mirror_minimal_repo(tmp: Path) -> None:
     """
     Download a single tarball of the repo at GIT_REF and extract only:
       - src/sweetbean/stimulus/**
       - docs/Stimuli/**
     into `tmp`, preserving relative paths.
-    This avoids Contents API rate limits entirely.
+    This avoids API rate limits entirely.
     """
     tar_url = f"https://codeload.github.com/{OWNER_REPO}/tar.gz/refs/heads/{GIT_REF}"
     r = requests.get(tar_url, timeout=60)
     r.raise_for_status()
 
-    # Load tarball in-memory
     with tarfile.open(fileobj=io.BytesIO(r.content), mode="r:gz") as tar:
-        # The tarball has a top-level folder like "<repo>-<something>/"
-        # Detect that prefix from the first member.
         members = tar.getmembers()
         if not members:
             raise SystemExit("Downloaded tarball is empty.")
         top_prefix = members[0].name.split("/")[0].rstrip("/")  # "<repo>-<sha>" or similar
 
-        # Paths we care about inside the tarball
         keep_prefixes = [
             f"{top_prefix}/src/sweetbean/stimulus/",
             f"{top_prefix}/docs/Stimuli/",
         ]
 
         for m in members:
-            name = m.name
-            # Skip directories
             if not m.isfile():
                 continue
-            # Keep only files under our prefixes
+            name = m.name
             if not any(name.startswith(pref) for pref in keep_prefixes):
                 continue
-
-            # Compute the relative path (strip the top folder)
-            rel = name.split("/", 1)[1] if "/" in name else name
-            # Write to tmp
+            rel = name.split("/", 1)[1] if "/" in name else name  # strip top folder
             dest = tmp / rel
             dest.parent.mkdir(parents=True, exist_ok=True)
             with tar.extractfile(m) as src_f, open(dest, "wb") as out_f:
@@ -421,10 +470,10 @@ def main() -> None:
         write_manifest_remote(out_dir)
 
         print(f"Wrote prompt bank to: {out_dir}")
-        print(f"  - step1_stimuli_index.json: {out_dir / 'stimuli_index.json'}")
-        print(f"  - step2_examples.json:      {out_dir / 'examples.json'}")
-        print(f"  - step3_init_docs.json:     {out_dir / 'init_docs.json'}")
-        print(f"  - manifest.json:            {out_dir / 'manifest.json'}")
+        print(f"  - stimuli_index.json: {out_dir / 'stimuli_index.json'}")
+        print(f"  - examples.json:      {out_dir / 'examples.json'}")
+        print(f"  - init_docs.json:     {out_dir / 'init_docs.json'}")
+        print(f"  - manifest.json:      {out_dir / 'manifest.json'}")
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
