@@ -1,1 +1,0 @@
-Ghasemi, O., Handley, S., Howarth, S., Newman, I. R., & Thompson, V. A. (2022). Logical intuition is not really about logic. Journal of Experimental Psychology: General, 151(9), 2009–2028. https://doi.org/10.1037/xge0001179

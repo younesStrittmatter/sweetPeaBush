@@ -1,1 +1,0 @@
-Hughes, S., De Houwer, J., Mattavelli, S., & Hussey, I. (2020). The shared features principle: If two objects share a feature, people assume those objects also share other features. Journal of Experimental Psychology: General, 149(12), 2264–2288. https://doi.org/10.1037/xge0000777
