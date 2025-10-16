@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
-from sweetExtract.steps.describe_experiments import DescribeExperiments
+from sweetExtract.steps.filter_empirical_experiments import FilterEmpiricalExperiments
 from sweetExtract.steps.catalog import Catalog
 from sweetExtract.steps.asset_catalog import AssetCatalog
 from sweetExtract.steps.llm_select_stimuli_per_role import LLMSelectStimuliPerRole
@@ -116,8 +116,8 @@ class LLMConstrainMediaUse(BaseStep):
         super().__init__(
             name="llm_constrain_media_use",
             artifact="meta/llm_media_constrained.json",
-            depends_on=[LLMSelectStimuliPerRole, AssetCatalog, Catalog, DescribeExperiments],
-            map_over=DescribeExperiments,
+            depends_on=[LLMSelectStimuliPerRole, AssetCatalog, Catalog, FilterEmpiricalExperiments],
+            map_over=FilterEmpiricalExperiments,
         )
         self._force = bool(force)
 

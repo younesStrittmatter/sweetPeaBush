@@ -8,7 +8,7 @@ from collections import Counter, defaultdict
 
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
-from sweetExtract.steps.describe_experiments import DescribeExperiments
+from sweetExtract.steps.filter_empirical_experiments import FilterEmpiricalExperiments
 
 
 def _peek_csv_headers(path: Path, encoding: str = "utf-8") -> List[str]:
@@ -27,6 +27,7 @@ def _sample_csv_rows(
     max_rows: int = 50,
     encoding: str = "utf-8",
 ) -> List[List[str]]:
+    # (Kept for compatibility; not used by the new unique-scan logic.)
     rows: List[List[str]] = []
     if not headers:
         return rows
@@ -105,15 +106,15 @@ class SBTrialSchemaPreview(BaseStep):
     def __init__(
         self,
         max_subject_files: int = 8,
-        max_rows_per_file: int = 50,
+        max_rows_per_file: int = 50,          # kept (unused by new logic), still documented
         max_examples_per_col: int = 12,
         force: bool = False,
     ):
         super().__init__(
             name="sb_schema_preview",
             artifact="meta/sb_schema_preview.json",
-            depends_on=[DescribeExperiments],  # map index; file preconditions enforced in should_run
-            map_over=DescribeExperiments,
+            depends_on=[FilterEmpiricalExperiments],
+            map_over=FilterEmpiricalExperiments,
         )
         self.max_subject_files = max_subject_files
         self.max_rows_per_file = max_rows_per_file
@@ -124,7 +125,6 @@ class SBTrialSchemaPreview(BaseStep):
         art = project.artifacts_dir
         trials_idx = art / "meta" / "trials_index.json"
         out = art / "meta" / "sb_schema_preview.json"
-        # Require trials_index.json; alias files optional. Respect force.
         return trials_idx.exists() and (self._force or not out.exists())
 
     def compute(self, project: Project) -> Dict[str, Any]:
@@ -217,11 +217,9 @@ class SBTrialSchemaPreview(BaseStep):
         """
         trials_items = self._load_trials(project)
         alias_map = self._alias_map_from_trials(trials_items)
-        # merge in experiment_aliases.json (do not overwrite existing keys)
         addl = self._alias_map_from_experiment_aliases(project, trials_items)
         for k, v in addl.items():
             alias_map.setdefault(k, v)
-        # merge in old exp_alias_index.json (do not overwrite existing keys)
         more = self._alias_map_from_index_file(project, len(trials_items))
         for k, v in more.items():
             alias_map.setdefault(k, v)
@@ -299,41 +297,64 @@ class SBTrialSchemaPreview(BaseStep):
                 "notes": [],
             }
 
-        # relative path helper (avoid absolute/relative mismatch)
+        # relative path helper
         def _rel(p: Path) -> str:
             try:
                 return str(p.relative_to(art_res))
             except Exception:
-                # Fallback: best-effort string
                 return str(p)
 
-        col_examples: Dict[str, List[str]] = defaultdict(list)
+        # Aggregators across selected subject files
+        col_examples: Dict[str, List[str]] = defaultdict(list)          # first-seen unique examples (order-preserving)
+        col_examples_seen: Dict[str, set] = defaultdict(set)            # membership for examples
+        col_unique_values: Dict[str, set] = defaultdict(set)            # true unique set across all scanned rows/files
         col_seen_in_files: Dict[str, int] = Counter()
         per_file_headers: Dict[str, List[str]] = {}
 
         for p in subject_csvs:
             headers = _peek_csv_headers(p)
             per_file_headers[_rel(p)] = headers
+
+            # mark presence for this file
             for h in headers:
                 col_seen_in_files[h] += 1
 
-            rows = _sample_csv_rows(p, headers, max_rows=self.max_rows_per_file)
-            for row in rows:
-                for h, v in zip(headers, row):
-                    if len(col_examples[h]) < self.max_examples_per_col and isinstance(v, str):
-                        v = v.strip()
-                        if v != "":
-                            col_examples[h].append(v)
+            # stream FULL file to compute n_unique and examples (first-seen unique up to cap)
+            try:
+                with p.open("r", encoding="utf-8", errors="ignore", newline="") as f:
+                    reader = csv.reader(f)
+                    _ = next(reader, None)  # skip header
+                    for row in reader:
+                        for h, v in zip(headers, row):
+                            if not isinstance(v, str):
+                                continue
+                            v = v.strip()
+                            if v == "":
+                                continue
+                            # grow the full unique set
+                            uset = col_unique_values[h]
+                            if v not in uset:
+                                uset.add(v)
+                            # grow the example list (first-seen unique up to cap)
+                            if (v not in col_examples_seen[h]) and (len(col_examples[h]) < self.max_examples_per_col):
+                                col_examples[h].append(v)
+                                col_examples_seen[h].add(v)
+            except Exception:
+                # ignore individual file read errors but keep whatever we have
+                pass
 
         column_union = sorted(col_seen_in_files.keys())
         columns: Dict[str, Dict[str, Any]] = {}
         for h in column_union:
             examples = col_examples.get(h, [])
             dtype = _infer_dtype(examples[: min(6, len(examples))])
+            n_unique = len(col_unique_values.get(h, set()))
             columns[h] = {
                 "dtype_guess": dtype,
                 "examples": examples[: self.max_examples_per_col],
                 "seen_in_n_subject_files": int(col_seen_in_files[h]),
+                "n_unique": int(n_unique),
+                "examples_truncated": bool(n_unique > len(examples)),
             }
 
         return {
@@ -345,7 +366,7 @@ class SBTrialSchemaPreview(BaseStep):
             "column_union": column_union,
             "columns": columns,
             "notes": [
-                f"Scanned up to {self.max_subject_files} subject CSVs and {self.max_rows_per_file} rows/file.",
+                f"Scanned up to {self.max_subject_files} subject CSVs (full files) with first-seen unique sampling (cap={self.max_examples_per_col}).",
                 "Matched by exact title/alias from trials_index.json and optional alias files; no normalization used.",
             ],
         }

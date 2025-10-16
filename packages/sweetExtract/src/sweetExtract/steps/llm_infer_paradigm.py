@@ -3,7 +3,7 @@ import json, os
 from typing import Any, Dict, List, Optional
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
-from sweetExtract.steps.describe_experiments import DescribeExperiments
+from sweetExtract.steps.filter_empirical_experiments import FilterEmpiricalExperiments
 
 def _load_io_map(artifacts_dir, title: str) -> Dict[str, Any]:
     p = artifacts_dir / "meta" / "llm_experiment_io_map.json"
@@ -53,8 +53,8 @@ class LLMInferParadigm(BaseStep):
         super().__init__(
             name="llm_infer_paradigm",
             artifact="meta/llm_paradigm.json",
-            depends_on=[DescribeExperiments],
-            map_over=DescribeExperiments,
+            depends_on=[FilterEmpiricalExperiments],
+            map_over=FilterEmpiricalExperiments,
         )
         self._force = bool(force)
 

@@ -7,11 +7,10 @@ from collections import Counter
 
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
-from sweetExtract.steps.describe_experiments import DescribeExperiments
+from sweetExtract.steps.filter_empirical_experiments import FilterEmpiricalExperiments
 from sweetExtract.steps.sb_schema_preview import SBTrialSchemaPreview
 
 
-# We support either alias filename; whichever exists will be used/preferred.
 _ALIAS_FILES = ("meta/exp_alias_index.json", "meta/experiment_aliases.json")
 
 
@@ -23,11 +22,6 @@ def _all_equal_lists(lists: List[List[str]]) -> bool:
 
 
 def _most_common_order(lists: List[List[str]]) -> List[str]:
-    """
-    Build a sensible canonical header order when files disagree:
-    - Count column frequency across files.
-    - Order by decreasing frequency, then by earliest first-seen position.
-    """
     freq = Counter()
     first_pos: Dict[str, int] = {}
     seen_any = False
@@ -61,32 +55,20 @@ class SBTrialSchemaForLLM(BaseStep):
           * if all files share identical headers -> use that list
           * else -> merged list ordered by frequency, then first-seen position
 
-      - columns: { col -> { "samples": [up to N unique values], "sample_truncated": bool } }
-
-    Strict about inputs:
-      • Uses ONLY artifacts (no filesystem heuristics).
-      • If an experiment title doesn't match exactly, we try alias-based resolution:
-          1) Prefer meta/exp_alias_index.json or meta/experiment_aliases.json if present
-          2) Else fall back to aliases embedded in trials_index.json
-          3) If still no direct preview match, try to match the preview item whose subject files
-             live under the same dest_dir as the trials item resolved by alias.
-
-    Input (combined): artifacts/meta/sb_schema_preview.json
-    Output (combined): artifacts/meta/sb_trial_schema_for_llm.json
-    Output (per-item): artifacts/sb_trial_schema_for_llm/{idx}.json
+      - columns: { col -> { "samples": [up to N unique values],
+                            "sample_truncated": bool,
+                            "n_unique": int (from preview if available) } }
     """
 
     def __init__(self, max_samples_per_col: int = 10, force: bool = False):
         super().__init__(
             name="sb_trial_schema_for_llm",
             artifact="meta/sb_trial_schema_for_llm.json",
-            depends_on=[SBTrialSchemaPreview],   # requires preview to exist first
-            map_over=DescribeExperiments,
+            depends_on=[SBTrialSchemaPreview],
+            map_over=FilterEmpiricalExperiments,
         )
         self.max_samples_per_col = max_samples_per_col
         self._force = bool(force)
-
-    # ---------- lifecycle ----------
 
     def should_run(self, project: Project) -> bool:
         art = project.artifacts_dir
@@ -99,13 +81,11 @@ class SBTrialSchemaForLLM(BaseStep):
         return not out.exists()
 
     def compute(self, project: Project) -> Dict[str, Any]:
-        # mapped step; BaseStep will aggregate per-item outputs for the combined artifact
         raise NotImplementedError
 
     # ---------- alias + wiring helpers ----------
 
     def _load_trials(self, project: Project) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
-        """Return (trials_items, canonical_title->idx)."""
         art = project.artifacts_dir
         obj = json.loads((art / "meta" / "trials_index.json").read_text(encoding="utf-8"))
         items: List[Dict[str, Any]] = obj.get("items") or []
@@ -117,17 +97,9 @@ class SBTrialSchemaForLLM(BaseStep):
         return items, canon_to_idx
 
     def _alias_to_idx(self, project: Project) -> Dict[str, int]:
-        """
-        Build alias->idx with this priority:
-          (A) alias file (if present)  -> idx
-          (B) trials_index: canonical title -> idx
-          (C) trials_index: per-item aliases[] -> idx
-        All matches are exact (no normalization).
-        """
         art = project.artifacts_dir
         trials_items, canon_to_idx = self._load_trials(project)
 
-        # Seed alias map with canonical titles and any per-item aliases[] present in trials_index
         alias_map: Dict[str, int] = {}
         for title, i in canon_to_idx.items():
             alias_map.setdefault(title, i)
@@ -136,7 +108,6 @@ class SBTrialSchemaForLLM(BaseStep):
                 if isinstance(a, str) and a:
                     alias_map.setdefault(a, i)
 
-        # Merge from alias file(s) if present; these override baseline
         for rel in _ALIAS_FILES:
             p = art / rel
             if not p.exists():
@@ -146,7 +117,6 @@ class SBTrialSchemaForLLM(BaseStep):
             except Exception:
                 continue
 
-            # shape 1: {"index": { "<alias>": {"idx": int, "experiment_title": "...", ... } } }
             if isinstance(obj.get("index"), dict):
                 for alias, rec in obj["index"].items():
                     if not isinstance(alias, str) or not alias:
@@ -159,7 +129,6 @@ class SBTrialSchemaForLLM(BaseStep):
                         alias_map[alias] = i
                 continue
 
-            # shape 2: {"items":[{"experiment_title": "...", "aliases": [...], "idx": int?}, ...]}
             if isinstance(obj.get("items"), list):
                 for rec in obj["items"]:
                     if not isinstance(rec, dict):
@@ -185,20 +154,12 @@ class SBTrialSchemaForLLM(BaseStep):
             return []
 
     def _find_preview_for_title_or_alias(self, project: Project, title: str) -> Optional[Dict[str, Any]]:
-        """
-        Strategy:
-          1) Direct match in preview by experiment_title with status ok
-          2) Alias → trials idx → trials dest_dir → match preview whose subject_files start with dest_dir
-        """
-        art = project.artifacts_dir
         previews = self._load_preview_items(project)
 
-        # 1) direct title match
         for it in previews:
             if (it or {}).get("experiment_title") == title and (it or {}).get("status") == "ok":
                 return it
 
-        # 2) alias resolution to trials idx, then match by dest_dir prefix
         alias_to_idx = self._alias_to_idx(project)
         if title not in alias_to_idx:
             return None
@@ -208,16 +169,13 @@ class SBTrialSchemaForLLM(BaseStep):
         if not (0 <= i < len(trials_items)):
             return None
         dest_dir = (trials_items[i] or {}).get("dest_dir") or ""
-
         if not isinstance(dest_dir, str) or not dest_dir:
             return None
 
-        # Match any preview whose subject files live under that dest_dir
         prefix = dest_dir.rstrip("/") + "/"
         for it in previews:
             if (it or {}).get("status") != "ok":
                 continue
-            # subject_files OR per_file_headers keys can both be used
             subj_files = (it.get("subject_files") or [])
             pfh_keys = list((it.get("per_file_headers") or {}).keys())
             pool = [*subj_files, *pfh_keys]
@@ -239,7 +197,6 @@ class SBTrialSchemaForLLM(BaseStep):
                 "reason": "no_preview_for_title_or_alias",
             }
 
-        # Gather per-file headers and decide on a canonical header list
         pfh: Dict[str, List[str]] = prev.get("per_file_headers") or {}
         header_lists = [h for h in pfh.values() if isinstance(h, list)]
         same_headers = _all_equal_lists(header_lists)
@@ -251,11 +208,9 @@ class SBTrialSchemaForLLM(BaseStep):
             headers = _most_common_order(header_lists)
             headers_from = "merged"
 
-        # Build unique value samples per column from preview examples (no file re-read)
         cols_meta: Dict[str, Any] = prev.get("columns") or {}
         columns_out: Dict[str, Dict[str, Any]] = {}
 
-        # Prefer the chosen header order; also include any extra columns present in preview
         ordered_cols = list(headers)
         for c in cols_meta.keys():
             if c not in ordered_cols:
@@ -266,16 +221,25 @@ class SBTrialSchemaForLLM(BaseStep):
             examples = info.get("examples") or []
             uniq = _unique_preserve_order([str(x) for x in examples])
             sample = uniq[: self.max_samples_per_col]
+
+            # NEW: propagate n_unique if present; use it for truncation
+            n_unique = info.get("n_unique")
+            if isinstance(n_unique, int):
+                sample_truncated = n_unique > len(sample)
+            else:
+                sample_truncated = len(uniq) > len(sample)
+
             columns_out[col] = {
                 "samples": sample,
-                "sample_truncated": len(uniq) > len(sample),
+                "sample_truncated": sample_truncated,
+                "n_unique": int(n_unique) if isinstance(n_unique, int) else None,
             }
 
         return {
             "experiment_title": title,
             "status": "ok",
-            "headers": headers,                 # single, canonical header list
-            "columns": columns_out,             # unique-value samples per column
-            "same_headers": same_headers,       # helpful diagnostic flag
-            "headers_from": headers_from,       # "identical" | "merged"
+            "headers": headers,
+            "columns": columns_out,
+            "same_headers": same_headers,
+            "headers_from": headers_from,
         }

@@ -34,7 +34,6 @@ class CatalogForLLM(BaseStep):
     def should_run(self, project: Project) -> bool:
         src = project.artifacts_dir / "meta" / "catalog.json"
         dst = project.artifacts_dir / "meta" / "catalog_llm.json"
-        # Run only if source exists AND (forced OR output missing)
         return src.exists() and (self._force or not dst.exists())
 
     def _from_text_table(self, f: Dict[str, Any]) -> Optional[Dict[str, Any]]:

@@ -1,8 +1,7 @@
-# sweetExtract/steps/build_unpacked_data.py
 from __future__ import annotations
-import os, json, hashlib, shutil, zipfile, tarfile, gzip, bz2, lzma
+import os, hashlib, shutil, zipfile, tarfile, gzip, bz2, lzma
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
@@ -81,7 +80,6 @@ class BuildUnpackedData(BaseStep):
     def should_run(self, project: Project) -> bool:
         if self._force:
             return True
-        # Only run if there is raw data and our manifest doesn't exist yet
         out_path = project.artifacts_dir / self.artifact
         return project.has_data_raw_files() and not out_path.exists()
 

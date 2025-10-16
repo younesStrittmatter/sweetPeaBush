@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
-from sweetExtract.steps.describe_experiments import DescribeExperiments
+from sweetExtract.steps.filter_empirical_experiments import FilterEmpiricalExperiments
 from sweetExtract.steps.llm_infer_paradigm import LLMInferParadigm
 
 
@@ -141,8 +141,8 @@ class LLMSelectStimuliPerRole(BaseStep):
         super().__init__(
             name="llm_select_stimuli_per_role",
             artifact="meta/llm_stimuli_selection.json",
-            depends_on=[LLMInferParadigm, DescribeExperiments],
-            map_over=DescribeExperiments,
+            depends_on=[LLMInferParadigm, FilterEmpiricalExperiments],
+            map_over=FilterEmpiricalExperiments,
         )
         self._force = bool(force)
 

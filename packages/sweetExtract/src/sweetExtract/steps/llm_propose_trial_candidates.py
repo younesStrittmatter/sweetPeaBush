@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
-from sweetExtract.steps.describe_experiments import DescribeExperiments
+from sweetExtract.steps.filter_empirical_experiments import FilterEmpiricalExperiments
 from sweetExtract.steps.catalog_for_llm import CatalogForLLM
 
 
@@ -176,13 +176,12 @@ class LLMProposeTrialCandidates(BaseStep):
         super().__init__(
             name="llm_propose_trial_candidates",
             artifact="meta/llm_propose_trial_candidates.json",
-            depends_on=[DescribeExperiments, CatalogForLLM],
-            map_over=DescribeExperiments,
+            depends_on=[FilterEmpiricalExperiments, CatalogForLLM],
+            map_over=FilterEmpiricalExperiments,
         )
         self._force = bool(force)
 
     def should_run(self, project: Project) -> bool:
-        # Require the slimmed catalog; rerun if forced or output missing.
         catalog_llm = project.artifacts_dir / "meta" / "catalog_llm.json"
         out_path = project.artifacts_dir / self.artifact
         return catalog_llm.exists() and (self._force or not out_path.exists())
@@ -192,7 +191,6 @@ class LLMProposeTrialCandidates(BaseStep):
 
     def compute_one(self, project: Project, item: Dict, idx: int,
                     all_items: List[Dict], prior_outputs: List[Dict]) -> Dict:
-        # strict, parser-friendly schema
         schema: Dict[str, Any] = {
             "type": "object",
             "additionalProperties": False,

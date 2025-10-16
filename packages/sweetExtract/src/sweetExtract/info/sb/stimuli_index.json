@@ -33,6 +33,16 @@
     "docs_index_relpath": "docs/Stimuli/foraging/index.md"
   },
   {
+    "key": "gabor",
+    "title": "Gabor",
+    "description": "Render one or more procedural Gabor patches on a canvas and collect keyboard and/or mouse responses. Each patch is defined by position, size (sigma), spatial frequency, orientation, phase, and contrast. Supports pixel or degree units (via px_per_deg). Overlapping patches are allowed.",
+    "when_to_use": [
+      "2AFC/left–right discrimination with Gabors (e.g., “which side is higher contrast?”).",
+      "Orientation / contrast / phase judgments with one or multiple patches."
+    ],
+    "docs_index_relpath": "docs/Stimuli/gabor/index.md"
+  },
+  {
     "key": "generic",
     "title": "Generic",
     "description": "",

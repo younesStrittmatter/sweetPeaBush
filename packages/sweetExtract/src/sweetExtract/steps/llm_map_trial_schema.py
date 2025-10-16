@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sweetExtract.steps.base import BaseStep
 from sweetExtract.project import Project
-from sweetExtract.steps.describe_experiments import DescribeExperiments
+from sweetExtract.steps.filter_empirical_experiments import FilterEmpiricalExperiments
 
 # ---------- helpers: load & prompt snippets ----------
 
@@ -167,8 +167,8 @@ class LLMMapTrialSchema(BaseStep):
         super().__init__(
             name="llm_map_trial_schema",
             artifact="meta/llm_experiment_io_map.json",
-            depends_on=[DescribeExperiments],
-            map_over=DescribeExperiments,
+            depends_on=[FilterEmpiricalExperiments],
+            map_over=FilterEmpiricalExperiments,
         )
         self._force = bool(force)
         self.max_cols_in_prompt = max_cols_in_prompt

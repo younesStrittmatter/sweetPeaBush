@@ -140,7 +140,6 @@ class Catalog(BaseStep):
             return True
         root = (project.artifacts_dir / "data_unpacked").resolve()
         out  = (project.artifacts_dir / self.artifact).resolve()
-        # Run once by default (when output missing) and only if there’s data to catalog
         return _has_any_files(root) and not out.exists()
 
     def compute(self, project: Project) -> Dict[str, Any]:
