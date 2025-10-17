@@ -104,6 +104,7 @@ def _build_functions_section(functions: List[Dict[str, Any]]) -> str:
     for f in functions:
         code = f.get("python_code") or ""
         args = list(f.get("args") or [])
+        args = ['TimelineVariable(' + json.dumps(a) + ')' for a in args]
         param = f.get("param") or "param"
         fn_name = f.get("fn_name") or f"map_{_snake(param)}"
         var_name = f"var_{_snake(param)}"
