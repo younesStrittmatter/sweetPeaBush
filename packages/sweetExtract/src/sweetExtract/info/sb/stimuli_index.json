@@ -170,6 +170,18 @@
     "docs_index_relpath": "docs/Stimuli/rsvp/index.md"
   },
   {
+    "key": "bilateralrsvp",
+    "title": "BilateralRSVP",
+    "description": "Present two synchronized RSVP streams (left and right) where one item per side appears each frame. Participants detect or identify a target on one stream (by feature/shape or content) while the opposite stream can carry a simultaneous distractor. You control per-frame timing (duration/ISI), per-side item sequences, optional masks, target/distractor annotations (shape/underline), keyboard response handling, and overall trial duration.",
+    "when_to_use": [
+      "Classic left–right RSVP with a single target per trial.",
+      "Shape-/feature-defined targets (e.g., circle vs. square) with optional post-target distractors.",
+      "Lateralized EEG/ERP paradigms (e.g., N2pc) needing stable bilateral placement.",
+      "Two-alternative forced-choice or identification tasks following rapid bilateral streams."
+    ],
+    "docs_index_relpath": "docs/Stimuli/bilateralrsvp/index.md"
+  },
+  {
     "key": "textsurvey",
     "title": "TextSurvey",
     "description": "Present one or more free-text questions with text input fields. Participants type their answers; each response is recorded per question. Useful for short answers, open-ended prompts, and typed recall.",

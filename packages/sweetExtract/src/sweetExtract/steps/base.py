@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import Any, Optional, Tuple, List, Dict, Union, Type
 import json, shutil
 
+from tqdm import tqdm
+
 from sweetExtract.utils.json_helpers import json_default, to_jsonable
 
 MapOverT = Union[
@@ -166,7 +168,7 @@ class BaseStep:
         prior_outputs: List[Dict] = []
         processed_any = False
 
-        for idx, item in enumerate(items):
+        for idx, item in tqdm(enumerate(items)):
             p = self._item_path(project, idx)
 
             # Reuse only when NOT forcing
